@@ -1,4 +1,3 @@
-'use client'
 import React from 'react'
 import { SideNav } from '../components'
 import Reports from './Reports'
