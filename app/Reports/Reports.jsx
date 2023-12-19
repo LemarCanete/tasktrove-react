@@ -1,3 +1,4 @@
+'use client'
 import React, {useEffect, useState} from 'react'
 import { BsBarChartSteps, BsFlagFill, BsXLg } from 'react-icons/bs';
 import Modal from 'react-modal'

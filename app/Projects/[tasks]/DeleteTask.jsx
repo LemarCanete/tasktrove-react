@@ -1,3 +1,4 @@
+'use client'
 import axios from 'axios';
 import React, {useState} from 'react'
 import {BsTrashFill} from 'react-icons/bs'
