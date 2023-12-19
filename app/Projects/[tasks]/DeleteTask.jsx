@@ -25,7 +25,7 @@ const customStyles = {
     },
     
 };
-Modal.setAppElement(document.getElementById('__next'))
+Modal.setAppElement("body")
 
 const DeleteTask = ({task}) => {
     const [modalIsOpen, setIsOpen] = useState(false)

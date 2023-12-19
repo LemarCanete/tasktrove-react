@@ -45,7 +45,7 @@ const customStyles = {
     },
     
 };
-Modal.setAppElement(document.getElementById('__next'))
+Modal.setAppElement("body")
 
 const UpdateTask = ({project_id, teamMembers, teamId, task, task_id, assignUser}) => {
     let subtitle;

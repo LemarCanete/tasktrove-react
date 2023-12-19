@@ -1,3 +1,4 @@
+'use client'
 import React, { useEffect, useState } from 'react'
 import { BsPencilSquare } from 'react-icons/bs'
 import { useRouter } from 'next/navigation'

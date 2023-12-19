@@ -23,7 +23,7 @@ const customStyles = {
     
 };
 
-Modal.setAppElement(document.getElementById('__next'))
+Modal.setAppElement("body")
 
 const UpdateProject = ({btn, cl, project_id, projectInfo, teamName, teamsInfo}) => {
     const [modalIsOpen, setIsOpen] = React.useState(false);

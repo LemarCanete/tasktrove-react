@@ -5,11 +5,10 @@ import { BsArrowLeftCircle, BsPencilFill, BsSendFill, BsUpload, BsDownload, BsTr
 import { useCookies } from 'react-cookie'
 import AddTask from './AddTask'
 import { SideNav } from '@/app/components'
-// import Calendar from '../Calendar/Calendar'
 import ShowGantt from '@/app/Gantt/ShowGantt'
 import UpdateTask from './UpdateTask'
 import { ToastContainer } from 'react-toastify'
-import Reports from '../../Reports/Reports'
+import Reports from '@/app/Reports/Reports'
 import DeleteTask from './DeleteTask'
 import { useRouter } from 'next/navigation'
 
@@ -202,7 +201,7 @@ const page = ({params}) => {
                             <AddTask project_id={project_id} func={handleAddTask} teamMembers={members} teamId={teamId} name="addTask" task_id=""/>
                             : <p className='text-info w-100 me-5 my-0'>{project.status}</p>
                         } 
-                        <Reports tasks={tasks} project={project} members={members}/>
+                        {tasks && <Reports tasks={tasks} project={project} members={members}/>}
                         <ShowGantt project_id={project_id}/>
                         <select className="mx-3 form-select" id="select" onChange={(e)=>setStatus(e.target.value)}>
                             <option value="All">All</option>

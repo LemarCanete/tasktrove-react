@@ -37,125 +37,123 @@ function getDaysDifference(input) {
   
     return daysDifference;
 }
-Modal.setAppElement(document.getElementById("__next"));
+Modal.setAppElement("body");
 
 const Reports = ({tasks, project, members}) => {
     const [modalIsOpen, setIsOpen] = useState(false);
-    const critical = tasks.filter(task => task.priority === "critical")
-    const normal = tasks.filter(task => task.priority === "normal")
-    const medium = tasks.filter(task => task.priority === "medium")
-    const low = tasks.filter(task => task.priority === "low")
-    const high = tasks.filter(task => task.priority === "high")
-    const projectProgress = tasks.filter(task => task.status === "Completed")
-    const formattedDate = formatDate(project.createdAt)
-    const daysDifference = getDaysDifference(project.createdAt)
-    // normal
-    const normalData = [
-        { name: 'Completed', value: (normal.filter(task => task.status === "Completed").length)},
-        { name: 'In Progress', value: (normal.filter(task => task.status === "In Progress").length)},
-        { name: 'Late', value: (normal.filter(task => task.status === "Late").length)},
-    ]
-    //critical
-    const criticalData = [
-        { name: 'Completed', value: (critical.filter(task => task.status === "Completed").length)},
-        { name: 'In Progress', value: (critical.filter(task => task.status === "In Progress").length)},
-        { name: 'Late', value: (critical.filter(task => task.status === "Late").length)},
-    ]
-    //medium
-    const mediumData = [
-        { name: 'Completed', value: (medium.filter(task => task.status === "Completed").length)},
-        { name: 'In Progress', value: (medium.filter(task => task.status === "In Progress").length)},
-        { name: 'Late', value: (medium.filter(task => task.status === "Late").length)},
-    ]
-    //low
-    const lowData = [
-        { name: 'Completed', value: (low.filter(task => task.status === "Completed").length)},
-        { name: 'In Progress', value: (low.filter(task => task.status === "In Progress").length)},
-        { name: 'Late', value: (low.filter(task => task.status === "Late").length)},
-    ]
-    const highData = [
-        { name: 'Completed', value: (high.filter(task => task.status === "Completed").length)},
-        { name: 'In Progress', value: (high.filter(task => task.status === "In Progress").length)},
-        { name: 'Late', value: (high.filter(task => task.status === "Late").length)},
-    ]
 
-    const completedRankings = Array.from(
-        tasks.reduce((acc, task) => {
-          const assignTo = task.assignTo;
-          if (task.status === 'Completed') {
-            acc.set(assignTo, {
-              noOfTaskCompleted: (acc.get(assignTo)?.noOfTaskCompleted || 0) + 1,
-              totalTasks: (acc.get(assignTo)?.totalTasks || 0) + 1,
-            });
-          } else {
-            acc.set(assignTo, {
-              ...acc.get(assignTo),
-              totalTasks: (acc.get(assignTo)?.totalTasks || 0) + 1,
-            });
-          }
-          return acc;
-        }, new Map()),
-        ([assignTo, stats]) => ({
-          assignTo,
-          noOfTaskCompleted: stats.noOfTaskCompleted || 0,
-          percentOfCompleted: stats.noOfTaskCompleted
-            ? (stats.noOfTaskCompleted / stats.totalTasks) * 100
-            : 0,
-        })
-    );
+    // Check if tasks is defined and is an array
+    const isArrayAndNotEmpty = Array.isArray(tasks) && (tasks.length || 0) > 0;
+
+    // Initialize filtered arrays if tasks is valid
+    const critical = isArrayAndNotEmpty ? tasks.filter(task => task.priority === "critical") : [];
+    const normal = isArrayAndNotEmpty ? tasks.filter(task => task.priority === "normal") : [];
+    const medium = isArrayAndNotEmpty ? tasks.filter(task => task.priority === "medium") : [];
+    const low = isArrayAndNotEmpty ? tasks.filter(task => task.priority === "low") : [];
+    const high = isArrayAndNotEmpty ? tasks.filter(task => task.priority === "high") : [];
+    const projectProgress = isArrayAndNotEmpty ? tasks.filter(task => task.status === "Completed") : [];
+
+    const formattedDate = isArrayAndNotEmpty ? formatDate(project.createdAt) : null;
+    const daysDifference = isArrayAndNotEmpty ? getDaysDifference(project.createdAt) : null;
+
+    const generateTaskData = (tasks) => {
+    return isArrayAndNotEmpty
+        ? [
+            { name: 'Completed', value: tasks.filter(task => task.status === 'Completed').length || 0},
+            { name: 'In Progress', value: tasks.filter(task => task.status === 'In Progress').length || 0},
+            { name: 'Late', value: tasks.filter(task => task.status === 'Late').length || 0},
+        ]
+        : [];
+    };
+
       
-      // Sort the array by percentOfCompleted in descending order
+      // Usage
+      const normalData = generateTaskData(normal);
+      const criticalData = generateTaskData(critical);
+      const mediumData = generateTaskData(medium);
+      const lowData = generateTaskData(low);
+      const highData = generateTaskData(high);
+
+      const completedRankings = isArrayAndNotEmpty
+      ? Array.from(
+          tasks.reduce((acc, task) => {
+            const assignTo = task.assignTo;
+            if (task.status === 'Completed') {
+              acc.set(assignTo, {
+                noOfTaskCompleted: (acc.get(assignTo)?.noOfTaskCompleted || 0) + 1,
+                totalTasks: (acc.get(assignTo)?.totalTasks || 0) + 1,
+              });
+            } else {
+              acc.set(assignTo, {
+                ...acc.get(assignTo),
+                totalTasks: (acc.get(assignTo)?.totalTasks || 0) + 1,
+              });
+            }
+            return acc;
+          }, new Map()),
+          ([assignTo, stats]) => ({
+            assignTo,
+            noOfTaskCompleted: stats.noOfTaskCompleted || 0,
+            percentOfCompleted: stats.noOfTaskCompleted
+              ? (stats.noOfTaskCompleted / stats.totalTasks) * 100
+              : 0,
+          })
+        )
+      : [];
+    
     const sortedCompletedRankings = completedRankings.sort(
-        (a, b) => b.percentOfCompleted - a.percentOfCompleted
-    );
-
-    const lateRankings = Array.from(
-        tasks.reduce((acc, task) => {
-        const assignTo = task.assignTo;
-        const today = new Date();
-        const taskDeadline = new Date(task.deadline);
-    
-        if (task.status === 'Late' && taskDeadline < today) {
-            acc.set(assignTo, {
-            noOfLateTasks: (acc.get(assignTo)?.noOfLateTasks || 0) + 1,
-            totalTasks: (acc.get(assignTo)?.totalTasks || 0) + 1,
-            });
-        } else {
-            acc.set(assignTo, {
-            ...acc.get(assignTo),
-            totalTasks: (acc.get(assignTo)?.totalTasks || 0) + 1,
-            });
-        }
-        return acc;
-        }, new Map()),
-        ([assignTo, stats]) => ({
-        assignTo,
-        noOfLateTasks: stats.noOfLateTasks || 0,
-        percentOfLateTasks: stats.noOfLateTasks
-            ? (stats.noOfLateTasks / stats.totalTasks) * 100
-            : 0,
-        })
+      (a, b) => b.percentOfCompleted - a.percentOfCompleted
     );
     
-    // Sort the array by percentOfLateTasks in descending order
+    const lateRankings = isArrayAndNotEmpty
+      ? Array.from(
+          tasks.reduce((acc, task) => {
+            const assignTo = task.assignTo;
+            const today = new Date();
+            const taskDeadline = new Date(task.deadline);
+    
+            if (task.status === 'Late' && taskDeadline < today) {
+              acc.set(assignTo, {
+                noOfLateTasks: (acc.get(assignTo)?.noOfLateTasks || 0) + 1,
+                totalTasks: (acc.get(assignTo)?.totalTasks || 0) + 1,
+              });
+            } else {
+              acc.set(assignTo, {
+                ...acc.get(assignTo),
+                totalTasks: (acc.get(assignTo)?.totalTasks || 0) + 1,
+              });
+            }
+            return acc;
+          }, new Map()),
+          ([assignTo, stats]) => ({
+            assignTo,
+            noOfLateTasks: stats.noOfLateTasks || 0,
+            percentOfLateTasks: stats.noOfLateTasks
+              ? (stats.noOfLateTasks / stats.totalTasks) * 100
+              : 0,
+          })
+        )
+      : [];
+    
     const sortedLateRankings = lateRankings.sort(
-        (a, b) => b.percentOfLateTasks - a.percentOfLateTasks
+      (a, b) => b.percentOfLateTasks - a.percentOfLateTasks
     );
     
-    // Log the result
-    // console.log(sortedLateRankings);
+    const workloadData = isArrayAndNotEmpty
+      ? Array.from(
+          tasks.reduce((acc, task) => {
+            let assignTo;
     
-
-    const workloadData = Array.from(tasks.reduce((acc, task) => {
-        let assignTo;
-
-        for(const i of members){
-            if(task.assignTo === i._id) assignTo = `${i.firstName} ${i.lastName}`;
-        }
-
-        acc.set(assignTo, (acc.get(assignTo) || 0) + 1);
-        return acc;
-    }, new Map()), ([name, count]) => ({ name, count }));
+            for (const i of members) {
+              if (task.assignTo === i._id) assignTo = `${i.firstName} ${i.lastName}`;
+            }
+    
+            acc.set(assignTo, (acc.get(assignTo) || 0) + 1);
+            return acc;
+          }, new Map()),
+          ([name, count]) => ({ name, count })
+        )
+      : [];
 
     const COLORS = ['#2c3e50', '#16a085', '#d35400'];
 
@@ -190,8 +188,8 @@ const Reports = ({tasks, project, members}) => {
                         <div className='d-flex mb-2'>
                             <div className="d-flex flex-column w-100">
                                 <div class="mx-2 mb-4 d-flex">
-                                    <Line percent={(projectProgress.length / tasks.length) * 100} strokeWidth={1.5} strokeColor="#2c3e50" />
-                                    {((projectProgress.length / tasks.length) * 100).toString().substring(0, 5)}%
+                                    {isArrayAndNotEmpty && <Line percent={((projectProgress.length || 0) / (tasks.length || 0)) * 100} strokeWidth={1.5} strokeColor="#2c3e50" />}
+                                    {isArrayAndNotEmpty && (((projectProgress.length || 0) / (tasks.length || 0)) * 100).toString().substring(0, 5)}%
                                 </div>
 
                                 {/* Normal, Critical, Medium, Low */}
@@ -224,8 +222,8 @@ const Reports = ({tasks, project, members}) => {
                                                     fill="#8884d8"
                                                     dataKey="value"
                                                 >
-                                                    {normalData.map((entry, index) => (
-                                                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                                                    {isArrayAndNotEmpty && normalData.map((entry, index) => (
+                                                    <Cell key={`cell-${index}`} fill={COLORS[index % (COLORS.length || 0)]} />
                                                     ))}
                                                 </Pie>
                                             </PieChart>}
@@ -244,8 +242,8 @@ const Reports = ({tasks, project, members}) => {
                                                     fill="#8884d8"
                                                     dataKey="value"
                                                 >
-                                                    {criticalData.map((entry, index) => (
-                                                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                                                    {isArrayAndNotEmpty && criticalData.map((entry, index) => (
+                                                    <Cell key={`cell-${index}`} fill={COLORS[index % (COLORS.length || 0)]} />
                                                     ))}
                                                 </Pie>
                                             </PieChart>}
@@ -264,8 +262,8 @@ const Reports = ({tasks, project, members}) => {
                                                     fill="#8884d8"
                                                     dataKey="value"
                                                 >
-                                                    {mediumData.map((entry, index) => (
-                                                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                                                    {isArrayAndNotEmpty && mediumData.map((entry, index) => (
+                                                    <Cell key={`cell-${index}`} fill={COLORS[index % (COLORS.length || 0)]} />
                                                     ))}
                                                 </Pie>
                                             </PieChart> }
@@ -284,8 +282,8 @@ const Reports = ({tasks, project, members}) => {
                                                     fill="#8884d8"
                                                     dataKey="value"
                                                 >
-                                                    {lowData.map((entry, index) => (
-                                                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                                                    {isArrayAndNotEmpty && lowData.map((entry, index) => (
+                                                    <Cell key={`cell-${index}`} fill={COLORS[index % (COLORS.length || 0)]} />
                                                     ))}
                                                 </Pie>
                                             </PieChart>}
@@ -304,8 +302,8 @@ const Reports = ({tasks, project, members}) => {
                                                     fill="#8884d8"
                                                     dataKey="value"
                                                 >
-                                                    {highData.map((entry, index) => (
-                                                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                                                    {isArrayAndNotEmpty && highData.map((entry, index) => (
+                                                    <Cell key={`cell-${index}`} fill={COLORS[index % (COLORS.length || 0)]} />
                                                     ))}
                                                 </Pie>
                                             </PieChart>}
@@ -367,7 +365,7 @@ const Reports = ({tasks, project, members}) => {
                                                 for(const i of members){
                                                     if(i._id === user.assignTo) member = `${i.firstName} ${i.lastName}`
                                                 }
-                                                return <tr>
+                                                return <tr key={index}>
                                                     <td>{index + 1}</td>
                                                     <td>{member}</td>
                                                     <td>{user.noOfTaskCompleted}</td>
@@ -394,7 +392,7 @@ const Reports = ({tasks, project, members}) => {
                                                 for(const i of members){
                                                     if(i._id === user.assignTo) member = `${i.firstName} ${i.lastName}`
                                                 }
-                                                return <tr className="">
+                                                return <tr className="" key={index}>
                                                     <td className="border-white border-end">{index + 1}</td>
                                                     <td className="border-white border-end">{member}</td>
                                                     <td className="border-white border-end">{user.noOfLateTasks}</td>

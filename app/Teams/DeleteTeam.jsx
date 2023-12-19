@@ -24,7 +24,7 @@ const customStyles = {
         width: "25%"
     },
 };
-Modal.setAppElement(document.getElementById('__next'))
+Modal.setAppElement("body")
 
 const DeleteTeam = ({team}) => {
     const [modalIsOpen, setIsOpen] = useState(false)
