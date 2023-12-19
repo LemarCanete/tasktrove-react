@@ -1,0 +1,61 @@
+import axios from 'axios';
+import React, {useState} from 'react'
+import { AiFillWarning } from 'react-icons/ai';
+import Modal from 'react-modal'
+
+const customStyles = {
+    overlay: {
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        backgroundColor: 'rgba(0, 0, 0, 0.5)'
+    },
+    content: {
+        top: '50%',
+        left: '50%',
+        right: 'auto',
+        bottom: 'auto',
+        marginRight: '-50%',
+        transform: 'translate(-50%, -50%)',
+        borderRadius: "1.1em",
+        width: "25%"
+    },
+};
+Modal.setAppElement(document.getElementById('__next'))
+
+const DeleteProject = ({project, deleteButton, className}) => {
+    const [modalIsOpen, setIsOpen] = useState(false)
+
+    const handleDelete = async () =>{
+        try{
+            const deleteProject = await axios.delete(`https://tasktrove-server.onrender.com/deleteProject/${project._id}`)
+            deleteProject && window.location.reload()
+        }catch(err){
+            console.log(err);
+        }     
+    }
+
+    return (
+        <>
+            {<button className={className} onClick={()=>setIsOpen(true)}>{deleteButton}</button>} 
+            <Modal isOpen={modalIsOpen}
+                onRequestClose={() => setIsOpen(false)}
+                style={customStyles}
+                contentLabel="Delete Project">
+                <div className='p-2 mb-4'>
+                    <p className='text-center text-danger display-4'>{<AiFillWarning />}</p>
+                    <h4 className='text-center'>Delete Project "{project.projectName.toUpperCase()}"</h4>
+                    <p className='text-center'>Deleting this project will remove all associated tasks and files. Proceed?</p>
+                </div>
+                <div className="d-flex w-100">
+                    <button onClick={()=>setIsOpen(false)} className='btn btn-light w-50 rounded-pill me-1'>No, keep it</button>
+                    <button type="submit" className="btn btn-danger w-50  rounded-pill ms-2" onClick={handleDelete}>Delete</button>
+                </div>
+            </Modal>
+        </>
+    )
+}
+
+export default DeleteProject
